@@ -1619,6 +1619,618 @@ La forma de usar este comando es la siguiente:
 
 ## Introduction To Bash Scripting And Linux Automation
 
+#Introduction to Bash Scripting and Linux Automation
+
+##¿Qué es bash?
+
+BASH es un shell de Unix (intérprete de comandos de Unix) escrito para el proyecto GNU. Su nombre es un acrónimo de bourne-again shell (otro shell bourne); haciendo un juego de palabras (born-again significa renacimiento) sobre el Bourne shell (sh), que fue uno de los primeros shells importantes de Unix.
+
+---
+####Hello World
+
+     myscript.sh
+>
+    #!/bin/bash
+    # A sample Bash script
+    echo Hello World!
+ ----
+* Línea 1 - Conocida como shebang o hash bang #! + ruta completa del interprete de comandos bash.
+
+* Línea 2 - Comentario.
+
+* Línea 3 - Es el comando "echo" que imprimirá un mensaje en la pantalla.
+
+##Variables
+
+Una variable es un almacén temporal de información. Hay dos acciones que podemos realizar para las variables:
+
+* Establecer un valor para una variable.
+* Lectura del valor de una variable.
+
+Aquí hay algunos puntos rápidos sobre la sintaxis.
+
+* Cuando nos referimos o leemos una variable colocamos un signo $ antes del nombre de la variable.
+* Al establecer una variable dejamos fuera el signo $.
+* Una variable se puede colocar en cualquier lugar de un script (o en la línea de comandos) y, cuando se ejecuta, Bash lo reemplazará por el valor de la variable. Esto se hace posible ya que la sustitución se realiza antes de ejecutar el comando.
+----
+####Hello Worl con variables
+>
+  #!/bin/bash
+>
+  STR="Hello World!"
+>
+  echo $STR
+----
+
+###Variables locales
+
+Las variables locales se pueden crear utilizando la palabra clave "local".
+
+---
+>
+  #!/bin/bash
+>
+  function hello {
+>
+     local HELLO=World
+>
+      HELLO=Hello
+      echo $HELLO
+    } 
+      echo $HELLO
+      hello
+      echo $HELLO
+---
+
+###Variables Especiales
+
+Hay algunas otras variables que el sistema establece.
+
+   * $0 - El nombre del bash script
+   * $1 - $9 - Los primeros 9 argumentos al bash script.
+   * $# - Cuántos argumentos se pasaron al Bash script.
+   * $@ - Todos los argumentos suministrados al Bash script.
+   * $? - El estado de salida del proceso ejecutado más recientemente.
+   * $$ - El ID de proceso del script actual.
+   * $USER - El nombre de usuario del usuario que ejecuta el script.
+   * $HOSTNAME - El hostname del equipo en el que se ejecuta el script.
+   * $SECONDS - El número de segundos desde que se inició el script.
+   * $RANDOM - Devuelve un número aleatorio diferente cada vez que se refiere.
+   * $LINENO - Devuelve el número de línea actual en el Bash script.
+
+###Creando nuestras propias variables
+
+Además de las variables que están preestablecidas por el sistema, también podemos establecer nuestras propias variables.
+
+---
+####simplevariables.sh
+
+>
+    #!/bin/bash
+    # A simple variable example
+    myvariable=Hello
+    anothervar=Fred
+    echo $myvariable $anothervar
+    echo
+    sampledir=/etc
+    ls $sampledir
+---
+
+* Líneas 3 y 4: Establecen el valor de las dos variables myvariable y anothervar.
+* Línea 5: Ejecute el comando echo para comprobar que las variables se han configurado como se desea.
+* Línea 6: echo sin argumentos para dejar una línea en blanco.
+* Línea 7: Establezca otra variable, esta vez como la ruta a un directorio en particular.
+* Línea 8: Ejecute el comando ls sustituyendo el valor de la variable sampledir como su primer argumento de línea de comandos.
+
+###Quotas
+
+Cuando queremos que las variables almacenen valores más complejos, necesitamos hacer uso de comillas. Esto se debe a que en circunstancias normales Bash utiliza un espacio para determinar elementos separados.
+
+Cuando incluimos nuestro contenido entre comillas, estamos indicando a Bash que el contenido debe considerarse como un solo elemento. Puede usar comillas simples (') o comillas dobles (").
+
+* Las comillas sencillas tratarán cada carácter literalmente.
+* Las comillas dobles le permitirán hacer la sustitución (es decir incluir variables dentro del valor del valor).
+-------------------------
+>
+myvar='Hello World'
+>
+echo $myvar
+>
+Hello World
+>
+--------------------------
+>
+newvar="More $myvar"
+>
+echo $newvar
+>
+More Hello World
+>
+--------------------------
+>
+newvar='More $myvar'
+>
+echo $newvar
+>
+More $myvar
+--------------------------
+
+###Exportando variables
+
+La idea es que las variables se limitan al proceso en el que se crearon. Normalmento esto no es un problema, pero a veces, por ejemplo, un script puede ejecutar otro script como uno de sus comandos. Si queremos que la variable esté disponible para el segundo script, entonces necesitamos exportar la variable.	
+
+---
+####script1.sh
+
+>
+    #!/bin/bash
+    # demonstrate variable scope 1.
+    var1=blah
+    var2=foo
+    # Let's verify their current value
+    echo $0 :: var1 : $var1, var2 : $var2
+    export var1
+    ./script2.sh
+    # Let's see what they are now
+    echo $0 :: var1 : $var1, var2 : $var2
+----
+
+####script2.sh
+
+>
+     #!/bin/bash
+     # demonstrate variable scope 2
+     # Let's verify their current value
+     echo $0 :: var1 : $var1, var2 : $var2
+     # Let's change their values
+     var1=flop
+     var2=bleh
+
+---
+####Salida
+>
+script1.sh :: var1 : blah, var2 : foo
+>
+script2.sh :: var1 : blah, var2 :
+>
+script1.sh :: var1 : blah, var2 : foo
+
+---
+##Funciones
+
+Crear una función es sencillo. Pueden escribirse en dos formatos distintos:
+
+>
+function_name () {
+>
+< commands >
+>
+}
+
+>
+function function_name {
+>
+< commands >
+>
+}
+
+####Ejemplo de una función:
+
+---
+####function_example.sh
+
+>
+    #!/bin/bash
+    # Basic function
+    print_something () {
+    echo Hello I am a function
+    }
+    print_something
+    print_something
+---
+
+####Explicación 
+
+* Línea 3 - Comenzamos definiendo la función dándole un nombre.
+* Línea 4 - Dentro de los corchetes podemos tener tantos comandos como queramos.
+* Líneas 6 y 7 - Una vez definida la función, podemos llamarla tantas veces como nos plazca y ejecutará esos comandos.
+
+####Salida
+
+>
+    ./function_example.sh
+    Hello I am a function
+    Hello I am a function
+
+###Pasando argumentos
+
+Podemos enviar datos a la función de una manera similar a pasar los argumentos de la línea de comandos a un script. Suministramos los argumentos directamente después del nombre de la función. Dentro de la función son accesibles como $ 1, $ 2, etc.
+
+---
+####arguments_example.sh
+
+>
+    #!/bin/bash
+    # Passing arguments to a function
+    print_something () {
+    echo Hello $1
+    }
+    print_something Mars
+    print_something Jupiter
+
+>
+    #!/bin/bash
+    # Passing arguments to a function
+    print_something () {
+    echo Hello $1
+    }
+    print_something Mars
+    print_something Jupiter
+---
+
+####Salida
+
+>
+    Hello Mars
+    Hello Jupiter
+
+###Regresando valores
+
+La mayoría de los otros lenguajes de programación tienen el concepto de un valor devuelto para las funciones, un medio para que la función devuelva los datos a la ubicación original de la llamada. Las funciones de Bash no nos permiten hacer esto. Sin embargo, nos permiten establecer un estado de retorno. Similar a cómo sale un programa o comando con un estado de salida que indica si tuvo éxito o no. Utilizamos la palabra clave return para indicar un estado de devolución.
+
+---
+####return_status_example.sh
+
+>
+    #!/bin/bash
+    # Setting a return status for a function
+    print_something () {
+    echo Hello $1
+    return 5
+    }
+    print_something Mars
+    print_something Jupiter
+    echo The previous function has a return value of $?
+---
+
+####Explicación 
+
+
+  * Line 5 - El estado de devolución puede ser una variable
+  * Line 9 - Recuerdas que la variable $? contiene el estado de devolución del comando o función previamente ejecutado.
+
+####Salida
+>
+Hello Mars
+>
+Hello Jupiter
+>
+The previous function has a return value of 5
+
+##Flujos de Control
+
+###Declaración básica if
+
+>
+if [ < some test > ]
+>
+then
+>
+< commands> 
+>
+fi
+
+Cualquier cosa entre if (fi hacia atrás) se ejecutará sólo si la prueba (entre los corchetes) es verdadera.
+
+---
+####Ejemplo if - then condición básica
+>
+ #!/bin/bash
+>
+if [ "foo" = "foo" ]; then
+>
+    echo expression evaluated as true
+>
+fi
+>
+---
+####Salida
+
+expression evaluated as true
+
+---
+####Ejemplo if - then - else condición básica
+
+>
+ #!/bin/bash
+>
+if [ "foo" = "foo" ]; then
+>
+    echo expression evaluated as true
+else
+>
+    echo expression evaluated as false
+>
+fi
+---
+####Salida
+
+expression evaluated as true
+
+---
+####Ejemplo Condición con variables
+
+>
+ #!/bin/bash
+>
+T1="foo"
+>
+T2="bar"
+>
+if [ "$T1" = "$T2" ]; then
+>
+    echo expression evaluated as true
+>
+else
+>
+    echo expression evaluated as false
+>
+fi
+---
+####Salida
+
+expression evaluated as false
+
+###Operaciones booleanas
+
+A veces sólo queremos hacer algo si se cumplen múltiples condiciones. Otras veces nos gustaría realizar la acción si una de varias condiciones se cumple. Podemos acomodar estos con operadores booleanos.
+
+  * and=&&
+  * or=||
+
+###Case statements
+
+Se declara de la siguiente forma:
+
+>
+case < variable > in
+>
+< pattern 1 >)
+>
+< commands >
+>
+;;
+>
+< pattern 2 >)
+>
+< other commands >
+>
+;;
+>
+esac
+
+---
+####Ejemplo case.sh
+
+>
+    #!/bin/bash
+    # case example
+    case $1 in
+    start)
+    echo starting
+    ;;
+    stop)
+    echo stoping
+    ;;
+    restart)
+    echo restarting
+    ;;
+    *)
+    echo don\'t know
+    ;;
+    esac
+---
+####Salida
+>
+/case.sh start
+starting
+>
+./case.sh restart
+restarting
+>
+./case.sh blah
+don't know
+
+###Loops
+
+####While 
+
+Se declara de la siguiente forma:
+
+>
+while [ < some test > ]
+>
+do
+>
+< commands >
+>
+done
+
+---
+####Ejemplo while_loop.sh
+
+>
+    #!/bin/bash
+    # Basic while loop
+    counter=1
+    while [ $counter -le 10 ]
+    do
+    echo $counter
+    ((counter++))
+    done
+    echo All done
+---
+####Explicación 
+
+* Línea 3 - Inicializaremos el contador de variables con su valor inicial.
+* Línea 4 - Mientras la prueba es verdadera (el contador es menor o igual a 10) hagamos los siguientes comandos.
+* Línea 6 - echo con el contador.
+* Línea 7 - Usando los soportes dobles podemos aumentar el valor del contador por 1.
+* Línea 8 - Estamos en la parte inferior del bucle para volver a la línea 5 y realizar la prueba de nuevo. Si la prueba es verdadera, ejecute los comandos. Si la prueba es falsa, continúe ejecutando los comandos siguientes.
+
+####Salida
+>
+1
+>
+2
+>
+3
+>
+4
+>
+5
+>
+6
+>
+7
+>
+8
+>
+9
+>
+10
+>
+All done
+
+###Until loops
+
+Es bastante similar al bucle while. La diferencia es que ejecutará los comandos dentro de él hasta que la prueba se convierta en verdadera
+
+>
+until [ < some test > ]
+>
+do
+>
+< commands >
+>
+done
+
+
+###For loops
+
+El bucle for es un poco diferente de los dos bucles anteriores. Lo que hace es decir para cada uno de los elementos de una lista dada, realizar el conjunto dado de comandos. Tiene la siguiente sintaxis.
+
+>
+for var in < list >
+>
+do
+>
+< commands >
+>
+done
+
+---
+####Ejemplo for_loop.sh
+
+>
+    #!/bin/bash
+    # Basic for loop
+    names='Stan Kyle Cartman'
+    for name in $names
+    do
+    echo $name
+    done
+    echo All done
+---
+####Salida
+
+>
+    Stan
+    Kyle
+    Cartman
+    All done
+
+###For con rangos
+
+---
+####Ejemplo for_loop_series.sh
+
+>
+    #!/bin/bash
+    # Basic range in for loop
+    for value in {1..5}
+    do
+    echo $value
+    done
+    echo All done
+---
+####Salida
+
+>
+    1
+    2
+    3
+    4
+    5
+    All done
+
+###Break
+
+La instrucción break le dice a Bash que deje el bucle inmediatamente. Puede ser que haya una situación normal que debería hacer que el bucle termine, pero también hay situaciones excepcionales en las que debería terminar también. Por ejemplo, tal vez estamos copiando archivos, pero si el espacio libre en disco está por debajo de cierto nivel debemos dejar de copiar.
+
+###Continue
+
+La instrucción continue le dice a Bash que deje de ejecutar esta iteración del bucle y comience la siguiente iteración. A veces hay circunstancias que nos impiden ir más lejos. Por ejemplo, tal vez estamos utilizando el bucle para procesar una serie de archivos, pero si nos encontramos con un archivo que no tenemos el permiso de lectura, no debemos tratar de procesarlo.
+
+###Select 
+
+El mecanismo de selección le permite crear un sistema de menú simple. Tiene el siguiente formato:
+
+>
+select var in < list >
+>
+do
+>
+< commands >
+>
+done
+
+---
+####Ejemplo select_example.sh
+
+>
+    #!/bin/bash
+    # A simple menu system
+    names='Kyle Cartman Stan Quit'
+    PS3='Select character: '
+    select name in $names
+    do
+    if [ $name == 'Quit' ]
+    then
+    break
+    fi
+    echo Hello $name
+    done
+    echo Bye
+
+---
+####Salida
+
+>
+1) Kyle     3) Stan
+2) Cartman  4) Quit
+
+>
+Select character: 2
+Hello Cartman
+>
+Select Character: 1
+Hello Kyle
+>
+Select character: 4
+Bye
+
+
 ## Automating System Tasks With Cron and AT, Linux Security Topics, System Logging, Managing Printing
 
 # System Logging
